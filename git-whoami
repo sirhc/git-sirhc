@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+printf '%s <%s>\n' \
+  "$( git config user.name || getent passwd "$( id -un )" | cut -d : -f 5 | cut -d , -f 1 )" \
+  "$( git config user.email || { [[ -n "${EMAIL:-}" ]] && echo "$EMAIL"; } || echo "$( id -nu )@$( hostname -f )" )"
