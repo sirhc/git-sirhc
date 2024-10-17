@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+
+OPTIONS_SPEC="\
+git jira <jira-command>
+
+Run the jira command with the Jira issue found in the current branch name.
+--
+"
+
+SUBDIRECTORY_OK='Yes'
+
+. "$( git --exec-path )/git-sh-setup"
+
+set -euo pipefail
+
+branch="$( git rev-parse --abbrev-ref HEAD )"
+
+if [[ $branch =~ ([A-Za-z]+-[0-9]+) ]]; then
+  exec jira "$@" "${match[1]:u}"
+else
+  print "error: branch '$branch' does not have a Jira issue"
+  exit 1
+fi
