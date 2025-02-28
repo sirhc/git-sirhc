@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+
+OPTIONS_SPEC="\
+git issue <subcommand>
+
+Something something something.
+--
+"
+
+SUBDIRECTORY_OK='Yes'
+
+. "$( git --exec-path )/git-sh-setup"
+
+set -eu -o pipefail
+set "$@"
+
+repo="$( git remote get-url origin )"
+repo="${repo##*/}"
+repo="${repo%.git}"
+
+git_issue_cherry_pick() {
+  local issue="$1"
+
+  while read -r url; do
+    print "Processing $url ..."
+    git cherry-pick "$( gh pr view "$url" --json mergeCommit --jq '.mergeCommit.oid' )" -m1 || :
+  done < <( jira pull-requests "$issue" | awk '($1 == "MERGED" && $2 ~ /\/Tealium\/'"$repo"'\//) { print $2 }' )
+}
+
+case "$1" in
+  cherry-pick)
+    shift
+    git_issue_cherry_pick "$@"
+    ;;
+  *)
+    print "$0: unknown subcommand '$1'" 1>&2
+    exit 2
+    ;;
+esac
