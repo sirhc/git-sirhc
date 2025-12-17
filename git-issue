@@ -27,10 +27,17 @@ git_issue_cherry_pick() {
   done < <( jira pull-requests "$issue" | awk '($1 == "MERGED" && $2 ~ /\/Tealium\/'"$repo"'\//) { print $2 }' )
 }
 
-case "$1" in
+case "${1:-}" in
   cherry-pick)
     shift
     git_issue_cherry_pick "$@"
+    ;;
+  show)
+    git rev-parse --abbrev-ref HEAD | grep -Eo '[A-Za-z]+-\d+' | head -1
+    ;;
+  '')
+    git issue -h
+    exit
     ;;
   *)
     print "$0: unknown subcommand '$1'" 1>&2
